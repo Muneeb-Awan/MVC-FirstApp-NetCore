@@ -1,0 +1,14 @@
+# --- build stage ---
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY . .
+# adjust the csproj path below to your MVC project
+RUN dotnet restore ./YourProject/YourProject.csproj
+RUN dotnet publish ./YourProject/YourProject.csproj -c Release -o /app/publish
+
+# --- runtime stage ---
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+COPY --from=build /app/publish .
+# .NET 8 aspnet image listens on 8080 by default
+ENTRYPOINT ["dotnet","YourProject.dll"]
